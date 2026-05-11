@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Parent {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  kids Kid[]
+
+  @@map("parents")
+}
+
+model Kid {
+  id          String   @id @default(cuid())
+  parentId    String   @map("parent_id")
+  displayName String   @map("display_name")
+  ageRange    String   @map("age_range")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  parent     Parent      @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  characters Character[]
+
+  @@index([parentId])
+  @@map("kids")
+}
+
+model Character {
+  id              String   @id @default(cuid())
+  kidId           String   @map("kid_id")
+  name            String
+  personalityJson Json     @map("personality_json")
+  visualUrl       String?  @map("visual_url")
+  statsJson       Json     @map("stats_json")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  kid Kid @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@index([kidId])
+  @@map("characters")
+}
