@@ -26,6 +26,7 @@ Consumer product. Web/PWA-first. Mobile-mobile. Kids ages 8–14 create AI chara
 - `src/lib/arena/` — arena mode logic (battle, talkshow, duel, story, hangout)
 - `src/lib/economy/` — Spark coin earning + spending logic
 - `src/lib/kws/` — SuperAwesome kWS integration
+- `src/middleware.ts` — Clerk auth middleware. NOTE: with src/ layout, middleware.ts must live at `src/middleware.ts`, not at the project root.
 - `prisma/` — schema + migrations
 - `docs/` — product/safety/architecture docs
 
