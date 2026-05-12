@@ -16,9 +16,11 @@
   "dependencies": {
     "@clerk/nextjs": "^7.3.3",
     "@prisma/client": "^6.19.3",
+    "ai": "^6.0.177",
     "next": "15.5.18",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "replicate": "^1.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

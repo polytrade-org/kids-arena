@@ -42,17 +42,60 @@ enum AgeRange {
 }
 
 model Character {
-  id              String   @id @default(cuid())
-  kidId           String   @map("kid_id")
-  name            String
-  personalityJson Json     @map("personality_json")
-  visualUrl       String?  @map("visual_url")
-  statsJson       Json     @map("stats_json")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                     String                  @id @default(cuid())
+  kidId                  String                  @map("kid_id")
+  name                   String
+  vibeDescription        String                  @map("vibe_description")
+  visualStyle            VisualStyle             @map("visual_style")
+  personalityJson        Json                    @map("personality_json")
+  personalityVersion     String                  @map("personality_version")
+  statsJson              Json                    @map("stats_json")
+  visualUrl              String?                 @map("visual_url")
+  visualGenerationStatus VisualGenerationStatus  @default(PENDING) @map("visual_generation_status")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
 
-  kid Kid @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  kid          Kid           @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  chatMessages ChatMessage[]
 
   @@index([kidId])
+  @@index([kidId, createdAt])
   @@map("characters")
+}
+
+enum VisualStyle {
+  REALISTIC
+  CARTOON
+  ANIME
+  PIXEL
+
+  @@map("visual_style")
+}
+
+enum VisualGenerationStatus {
+  PENDING
+  READY
+  FAILED
+
+  @@map("visual_generation_status")
+}
+
+model ChatMessage {
+  id          String          @id @default(cuid())
+  characterId String          @map("character_id")
+  role        ChatMessageRole
+  content     String
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@index([characterId, createdAt])
+  @@map("chat_messages")
+}
+
+enum ChatMessageRole {
+  USER
+  CHARACTER
+
+  @@map("chat_message_role")
 }
