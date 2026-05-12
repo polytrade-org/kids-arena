@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { SignOutButton } from "@clerk/nextjs";
 import { prisma } from "@/lib/db";
+import { AGE_RANGE_LABELS } from "@/lib/validation/kid";
 
 export default async function ParentDashboard() {
   const user = await currentUser();
@@ -21,6 +23,12 @@ export default async function ParentDashboard() {
     where: { email },
     update: {},
     create: { email },
+    include: {
+      kids: {
+        orderBy: { createdAt: "asc" },
+        include: { _count: { select: { characters: true } } },
+      },
+    },
   });
 
   return (
@@ -34,16 +42,52 @@ export default async function ParentDashboard() {
         </SignOutButton>
       </header>
 
-      <section className="space-y-2 rounded-lg border border-black/10 p-6 dark:border-white/20">
+      <section className="mb-8 space-y-2 rounded-lg border border-black/10 p-6 dark:border-white/20">
         <p className="text-sm text-black/60 dark:text-white/60">Signed in as</p>
         <p className="font-mono text-lg">{email}</p>
-        <p className="text-sm text-black/60 dark:text-white/60">
-          Parent record id: <span className="font-mono">{parent.id}</span>
-        </p>
       </section>
 
-      <section className="mt-8 rounded-lg border border-dashed border-black/20 p-6 text-sm text-black/60 dark:border-white/30 dark:text-white/60">
-        Kid management, character oversight, time limits, and earnings will appear here.
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-black/60 dark:text-white/60">
+            Kids
+          </h2>
+          <Link
+            href="/parent-dashboard/kids/new"
+            className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition hover:opacity-90"
+          >
+            + Add a kid
+          </Link>
+        </div>
+
+        {parent.kids.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-black/20 p-8 text-center text-sm text-black/60 dark:border-white/30 dark:text-white/60">
+            <p className="mb-3">No kids yet.</p>
+            <Link
+              href="/parent-dashboard/kids/new"
+              className="font-medium underline-offset-4 hover:underline"
+            >
+              Add your first kid →
+            </Link>
+          </div>
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {parent.kids.map((kid) => (
+              <li key={kid.id}>
+                <Link
+                  href={`/parent-dashboard/kids/${kid.id}`}
+                  className="block rounded-lg border border-black/10 p-4 transition hover:border-black/30 dark:border-white/20 dark:hover:border-white/40"
+                >
+                  <p className="text-lg font-medium">{kid.displayName}</p>
+                  <p className="mt-1 text-xs text-black/60 dark:text-white/60">
+                    {AGE_RANGE_LABELS[kid.ageRange]} · {kid._count.characters}{" "}
+                    character{kid._count.characters === 1 ? "" : "s"}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

@@ -22,7 +22,7 @@ model Kid {
   id          String   @id @default(cuid())
   parentId    String   @map("parent_id")
   displayName String   @map("display_name")
-  ageRange    String   @map("age_range")
+  ageRange    AgeRange @map("age_range")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -31,6 +31,14 @@ model Kid {
 
   @@index([parentId])
   @@map("kids")
+}
+
+enum AgeRange {
+  AGES_8_10
+  AGES_11_12
+  AGES_13_14
+
+  @@map("age_range")
 }
 
 model Character {
