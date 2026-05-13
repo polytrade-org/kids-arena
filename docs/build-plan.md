@@ -222,11 +222,247 @@
 
 ## After Session 5: Human will do
 
-- Invite 10–20 known kids (son's friends, family kids) to alpha
+- Invite 10–20 known kids (son's friends, family kids — Vihaan first) to alpha
 - Get parents' verbal consent (no formal kWS yet — Phase C)
 - Manually monitor flagged content via daily DB review
 - Observe usage for 4 weeks (Phase B — Validate)
 - Decision at end of Phase B: GO PUBLIC (start Phase C), PIVOT, or KILL per brief §16
+
+If validation passes, V1.5 begins. V1.5 has two parallel workstreams: Arena retention features (Session 6) and the Studio module (Sessions 7–11). Studio is a first-class module of Kids AI Arena, not a feature add — see brief §6a for the two-module thesis.
+
+---
+
+## V1.5 — Sessions 6–11
+
+These sessions ship only after V1 alpha validates. Don't start any of them until human gives the green light post-validation.
+
+---
+
+## SESSION 6 — Arena V1.5 (retention + earning loops)
+
+**Goal:** add Spark coin cashout, character marketplace, more arena modes.
+
+1. Spark coin → real money cashout flow:
+   - Conversion rate from brief §7 (1000 Spark = $1)
+   - Minimum payout threshold ($20)
+   - Parent approval required
+   - Stripe Connect integration for payout to parent's bank
+   - Tax form collection for parents above earning thresholds
+
+2. Character marketplace:
+   - Listings page where kids browse/buy characters from other kids
+   - Listing flow (kid lists own character, sets Spark price)
+   - Trade transactions with 15% marketplace fee to platform
+   - Creator royalty system (original creator earns 5% on every resale)
+
+3. Two more arena modes (per brief §4.2):
+   - Creative Duel (characters face creative challenges; community vote)
+   - Story Mode (characters live in evolving worlds, write their own stories)
+
+4. Daily/weekly featured creator program:
+   - Algorithmic + manual curation
+   - Featured creators get bonus Spark coins + leaderboard badge
+
+Stop, summarize, wait for human approval before starting Studio sessions.
+
+---
+
+## SESSION 7 — Studio foundation + Thumbnail Generator
+
+**Goal:** lay Studio module infrastructure and ship the first creator tool — thumbnail generation.
+
+**Why thumbnails first:**
+- Lowest technical risk (image generation, same pipeline as character visuals)
+- Immediate visible value to kid creators
+- Validates the Studio user flow before expensive features (video)
+- Vihaan-validated need: thumbnails are real friction on his channel today
+
+**Pre-work the human will complete in browser before this session:**
+- Confirm Anthropic + Replicate API budgets can absorb additional load (estimate +$50–100/mo)
+- (Optional) Sign up for Recraft V3 or Ideogram via API if higher-quality typography on thumbnails is needed
+
+1. Add Studio entry point to the parent dashboard:
+   - New top-level nav option: "Studio" alongside existing "Arena"
+   - Route: `/parent-dashboard/kids/[kidId]/studio`
+   - Empty state with the planned tools listed; thumbnail generator marked "Available"
+
+2. Create `src/app/parent-dashboard/kids/[kidId]/studio/thumbnails/new/page.tsx` — thumbnail creation form:
+   - Video description (textarea, max 300 chars)
+   - Channel niche (select from kid's profile defaults: cars / gaming / anime / sports / general)
+   - Title text (50 chars max, shown on thumbnail)
+   - Style preset (bright/energetic, mysterious, comedic, professional)
+   - Optionally upload a reference image (e.g., the kid's face for inclusion)
+
+3. Server action `generateThumbnails(formData)`:
+   - Validate with zod
+   - Run video description + title through moderation
+   - Generate 8 thumbnail variants using Flux Pro (better text rendering than Schnell):
+     - Prompt template includes niche, style preset, title text overlay
+     - Parallel API calls for speed
+   - Save thumbnail set to DB (new `ThumbnailSet` and `Thumbnail` models)
+   - Display tournament-style grid for kid to pick favorite
+
+4. Thumbnail set detail page:
+   - Grid of 8 thumbnails
+   - Tap to enlarge
+   - "Pick this one" → marks selected + offers download (PNG/JPG, exact YouTube dimensions 1280×720)
+   - "Generate more" option (counts against weekly quota)
+
+5. Per-kid rate limit: 5 thumbnail sets per week on free tier; unlimited on premium.
+
+6. Update parent dashboard's main view to show Studio activity (thumbnails generated this week).
+
+Test full flow with Vihaan as primary user: select a real recent Dubai Car Spotter upload, generate thumbnails for it, compare to the one he actually used. Document the gap.
+
+Stop, summarize, wait for human approval.
+
+---
+
+## SESSION 8 — Studio: Script Writer
+
+**Goal:** generate scripts for kid creators in their niche and voice.
+
+1. Add `/parent-dashboard/kids/[kidId]/studio/scripts/new/page.tsx`:
+   - Niche selector (defaults from kid profile)
+   - Video topic (textarea, max 500 chars)
+   - Target length (30 sec / 60 sec / 2 min / custom)
+   - Tone (excited / educational / funny / calm explainer)
+   - "Match my style" toggle (uses past scripts from this kid as voice reference if any exist)
+
+2. Server action `generateScript(formData)`:
+   - Validate + moderate inputs
+   - Use Claude with a system prompt tuned for kid creator scripts:
+     - "Generate a video script for a [age range] kid creator in the [niche] niche. Tone: [tone]. Target length: [length]. Topic: [topic]. Include: hook (first 3 sec), main content, payoff/CTA. Output as JSON: {hook, sections[], outro, estimatedDuration}. Keep language at a [age range] reading level."
+   - Save Script to DB
+   - Display in editable format (kid can rewrite sections inline)
+
+3. Script library page: `/parent-dashboard/kids/[kidId]/studio/scripts` — list of all scripts for this kid, filterable by niche.
+
+4. Export options:
+   - Plain text copy
+   - Teleprompter mode (large text, scrollable, pace-controlled)
+   - Send to Shorts editor (when Session 10 ships)
+
+5. Rate limit: 10 scripts per week free tier.
+
+Stop, summarize, wait for approval.
+
+---
+
+## SESSION 9 — Studio: B-roll Generator/Fetcher
+
+**Goal:** kid types a description; gets royalty-free or AI-generated footage.
+
+1. Add `/parent-dashboard/kids/[kidId]/studio/broll/new/page.tsx`:
+   - Description ("3 seconds of a red Ferrari accelerating", "drone shot of Dubai skyline at sunset")
+   - Duration (1s / 3s / 5s / 10s)
+   - Source preference: AI-generated, royalty-free stock, or "best available"
+
+2. Server action `generateBroll(formData)`:
+   - Validate + moderate
+   - For stock: query Pexels API (free) or Pixabay (free) — return top matches
+   - For AI-generated: use Replicate's video model (Veo, Runway Gen-3, or LTX-Video depending on availability/cost)
+   - Save B-roll asset to R2 storage; save metadata to DB
+   - Display all matches; kid picks favorite
+
+3. B-roll library page (saved clips for reuse)
+
+4. Rate limit: 5 AI-generated clips per week free; unlimited stock.
+
+5. Cost monitoring: video gen is expensive ($0.10–$1 per clip depending on model). Add per-kid daily caps independent of weekly free-tier limits.
+
+Stop, summarize, wait for approval.
+
+---
+
+## SESSION 10 — Studio: Shorts Auto-Editor
+
+**Goal:** kid uploads raw footage; AI suggests an edit; outputs a publishable short.
+
+This is the most complex session. Likely needs to be split across two work sessions if it gets too large — Claude Code should flag if so.
+
+1. Video upload + processing pipeline:
+   - Direct upload to R2 (presigned URLs)
+   - Process via FFmpeg in a serverless function or queue worker
+   - Generate thumbnails of every ~2-second segment for AI to "see"
+   - Extract audio for AI transcription (via Whisper API or Deepgram)
+
+2. AI editing logic (use Claude as the editor):
+   - Feed scene thumbnails + transcript chunks to Claude
+   - Claude returns suggested cut list: `[{startTime, endTime, reason}]`
+   - Apply cuts via FFmpeg server-side
+   - Add captions (from transcript) with style preset
+   - Suggest music from a curated royalty-free library
+   - Output: 30–60s short, 9:16 vertical, ready to publish
+
+3. Editor UI:
+   - Timeline view with AI-suggested cuts highlighted
+   - Kid can accept/reject each cut
+   - Music selector (preview, pick)
+   - Caption style picker (font, color, position)
+   - Preview before export
+
+4. Export to MP4 + 9:16 thumbnail.
+
+5. Rate limit: 3 shorts edits per week free.
+
+6. Cost watch: this is the most expensive Studio feature. Per-edit cost likely $0.50–$2 in compute + AI. Set hard per-kid daily cap.
+
+If complexity blows the session, split into 10a (upload + transcription + AI cut suggestion) and 10b (FFmpeg apply + caption + export).
+
+Stop, summarize, wait for approval.
+
+---
+
+## SESSION 11 — Studio: Voice Generation + Publishing + Polish
+
+**Goal:** voice cloning for narration, direct publish to YouTube/TikTok/Instagram, V1.5 polish.
+
+**Pre-work the human will do:**
+- Sign up for ElevenLabs (voice cloning API)
+- Add `ELEVENLABS_API_KEY` to .env.local and Vercel
+- Apply for YouTube, TikTok, and Instagram API access (these take 1–2 weeks; start early)
+
+1. Voice samples + cloning:
+   - Voice consent flow: parent must explicitly approve voice cloning for their kid (separate from general account consent — COPPA-conscious)
+   - Recording UI: 3 minutes of sample audio (read provided script)
+   - Voice authentication: re-record a phrase to verify it's the same person
+   - Submit to ElevenLabs for voice clone training
+   - Save voice profile ID to Kid model
+
+2. Voice usage:
+   - In script writer: "Generate audio" button reads script in kid's cloned voice
+   - In Shorts editor: replace original audio with cloned narration (kid's choice)
+
+3. One-click publish:
+   - YouTube Shorts: OAuth flow, upload Shorts directly with title + description + thumbnail
+   - TikTok: same pattern via TikTok for Developers
+   - Instagram Reels: same via Instagram Graph API
+   - Always include "Made with Polytrade Studio" in description as soft viral mechanic
+
+4. Studio dashboard:
+   - Total content shipped this week
+   - Spark coins earned from Studio (via per-publish bonus + view-based rewards)
+   - Best-performing thumbnail / script / clip
+   - Vihaan-style real-creator metrics
+
+5. V1.5 polish across both Arena and Studio:
+   - Unified earning dashboard (Arena + Studio Spark in one view)
+   - Cross-promote: in Arena character detail, link to "Make a video about this character" (sends to Studio); in Studio detail, link to "Make a character for this video" (sends to Arena)
+   - Onboarding flow: new parent picks "creator-focused" (Studio first) or "play-focused" (Arena first); both modules visible regardless
+
+Stop, summarize. V1.5 ships.
+
+---
+
+## After Session 11: Phase C (public launch readiness)
+
+If V1.5 validates with Vihaan + alpha cohort, move to Phase C per brief:
+- SuperAwesome kWS for full COPPA/GDPR-K compliance
+- Domain registration
+- Legal review of ToS/Privacy
+- Brand identity contractor
+- Public beta launch
 
 ---
 

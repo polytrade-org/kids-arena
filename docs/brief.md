@@ -190,29 +190,71 @@ This isn't a gambling mechanic — it's a creator royalty mechanic. Popular cont
 
 ## 6. Roadmap
 
-### V1 (Weeks 1–12) — Functional MVP
+### V1 (Weeks 1–12) — Functional MVP (Arena module)
 Per §5. Web/PWA. Character creation + 2 arena modes + parent dashboard. Subscription monetization only.
 
-### V1.5 (Weeks 13–20) — First earning + retention loops
+### V1.5 (Weeks 13–24) — Studio module + earning loops
+
+Two distinct workstreams ship in V1.5:
+
+**(a) Arena retention + earning** (continuation of V1):
 - Spark coin → real money cashout (parent-approved)
 - Character marketplace (kids trade/sell characters to other kids; creator earns royalty)
-- Native iOS app
 - Two more arena modes (Creative Duel + Story Mode)
 - Daily/weekly featured creator program
 
-### V2 (Months 6–12) — Platform expansion
+**(b) Studio — AI creator tools for kid content creators** ⭐ first-class module, not a feature add
+The Studio module serves kid creators making real content (videos, shorts, thumbnails) for YouTube/TikTok/Instagram. Same user, same parent dashboard, same earnings system as Arena — different surface.
+
+Founder-validated user: Vihaan and the millions of kid creators like him already running niche channels.
+
+V1.5 Studio features:
+- **Thumbnail generator** — describe the video; AI generates 5–10 thumbnail variants with title text, character expressions, on-trend styling
+- **Script writer** — pick a niche (cars / gaming / anime / sports / etc.) + topic + tone (excited / educational / funny); AI returns a 30s–2min script
+- **B-roll fetcher / generator** — "I need 3 seconds of a Lamborghini revving" → royalty-free footage retrieved or AI-generated. Critical for niche creators who can't film every subject themselves.
+- **Shorts auto-editor** — kid uploads long-form footage or selects scenes; AI suggests cuts, captions, transitions, music for a 30–60s short ready for upload
+- **Voice generation** — kid records voice samples (with parent consent + voice authentication); AI clones for narration. Especially valuable during puberty when kids hate their natural voice.
+- **One-click publish** — direct to YouTube Shorts, TikTok, Instagram Reels via OAuth. Always includes "Made with Polytrade Studio" attribution as a soft viral mechanic.
+
+Both Arena and Studio plug into the same earnings system (Spark coins). A creator who's good at both compounds earnings faster.
+
+### V1.5 native iOS
+Ships alongside V1.5 modules. Web/PWA stays the primary surface; native iOS adds offline capability + push notifications.
+
+### V2 (Months 7–14) — Platform expansion
 - Native Android app
 - Cross-platform export: Roblox character export, Minecraft skin generation
-- Voice characters (kid creators record voice samples; AI clones for character speech)
-- Creator analytics dashboard
+- Voice characters in Arena (use Studio's voice infrastructure for in-character speech)
+- Creator analytics dashboard (both Arena and Studio metrics in one view)
 - Brand sponsorships marketplace (PG-rated, parent-approved)
 - Open SDK for arena mode creation by sophisticated creators
 
 ### V3+ — Scale
 - International expansion (multilingual)
-- Educational integrations (teachers create classroom arenas)
+- Educational integrations (teachers create classroom arenas + classroom Studio for school media projects)
 - AR character viewer
 - Hardware integrations (smart toy?)
+
+---
+
+## 6a. The two-module thesis
+
+Polytrade Kids AI Arena is **one product, two modules** — not two products under one brand.
+
+**Arena** = creative play with AI characters. The fictional world. Users design characters, deploy them in competitions, earn from popularity. Pure creative expression with AI-native mechanics.
+
+**Studio** = real-world creator tools. The publishing world. Users make actual videos, thumbnails, scripts. The output goes to YouTube/TikTok/Instagram, where their existing audiences live.
+
+The user is the same kid. The parent dashboard is the same. The earnings system is the same. The brand is the same.
+
+Why this matters:
+- Arena alone is creative play without external impact — risk of being seen as "just another kid app"
+- Studio alone is editing tools without the social/competitive layer — risk of being commoditized by CapCut + better
+- Together, they form an actual "creator platform for kids" — creative practice in Arena, real-world publishing via Studio, both feeding the same earnings flywheel
+
+Vihaan running Dubai Car Spotter is the founder-validated proof: kid creators already exist, already produce, already want better tools. Studio is the module they need. Arena is the module that compounds engagement when they're not actively publishing.
+
+Build sequence: Arena first (V1) for novelty + viral mechanics + validation. Studio second (V1.5) for retention + real-world utility + creator earnings. Together they're the platform.
 
 ---
 
