@@ -14,9 +14,9 @@ const MODEL_CHAT = "anthropic/claude-sonnet-4.6";
 
 const personalitySchema = z.object({
   catchphrase: z.string().min(2).max(80),
-  speakingStyle: z.string().min(8).max(200),
-  favoriteThings: z.array(z.string().min(2).max(50)).min(3).max(5),
-  quirks: z.array(z.string().min(2).max(80)).min(2).max(3),
+  speakingStyle: z.string().min(8).max(250),
+  favoriteThings: z.array(z.string().min(2).max(100)).min(3).max(5),
+  quirks: z.array(z.string().min(2).max(150)).min(2).max(3),
 });
 
 export type CharacterPersonality = z.infer<typeof personalitySchema>;

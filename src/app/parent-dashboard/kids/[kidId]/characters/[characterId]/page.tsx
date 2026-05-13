@@ -46,6 +46,32 @@ export default async function CharacterDetailPage({
   const personality = character.personalityJson as unknown as CharacterPersonality;
   const stats = character.statsJson as unknown as CharacterStats;
 
+  const [wins, losses, sparkSum, recentBattles] = await Promise.all([
+    prisma.battle.count({ where: { winnerId: character.id } }),
+    prisma.battle.count({
+      where: {
+        OR: [{ characterAId: character.id }, { characterBId: character.id }],
+        NOT: { winnerId: character.id },
+      },
+    }),
+    prisma.battle.aggregate({
+      _sum: { sparkCoinsAwarded: true },
+      where: { winnerId: character.id },
+    }),
+    prisma.battle.findMany({
+      where: {
+        OR: [{ characterAId: character.id }, { characterBId: character.id }],
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        characterA: { select: { id: true, name: true } },
+        characterB: { select: { id: true, name: true } },
+      },
+    }),
+  ]);
+  const sparkEarned = sparkSum._sum.sparkCoinsAwarded ?? 0;
+
   return (
     <div className="mx-auto max-w-3xl p-8">
       <nav className="mb-6 text-sm">
@@ -132,6 +158,63 @@ export default async function CharacterDetailPage({
             </ul>
           </div>
         </div>
+      </section>
+
+      <section className="mb-8 rounded-lg border border-black/10 p-6 dark:border-white/20">
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-sm font-medium text-black/60 dark:text-white/60">
+            Arena record
+          </h2>
+          <Link
+            href="/arena/battle/new"
+            className="text-sm font-medium underline-offset-4 hover:underline"
+          >
+            Send to arena →
+          </Link>
+        </div>
+        <dl className="mb-4 grid grid-cols-3 gap-3 text-center">
+          <Stat label="Wins" value={wins} />
+          <Stat label="Losses" value={losses} />
+          <Stat label="Spark earned" value={sparkEarned} />
+        </dl>
+        {recentBattles.length === 0 ? (
+          <p className="text-sm text-black/50 dark:text-white/50">
+            No battles yet.
+          </p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {recentBattles.map((b) => {
+              const isA = b.characterAId === character.id;
+              const opponent = isA ? b.characterB : b.characterA;
+              const won = b.winnerId === character.id;
+              return (
+                <li
+                  key={b.id}
+                  className="flex items-center justify-between gap-3 rounded-md border border-black/5 px-3 py-2 dark:border-white/10"
+                >
+                  <span>
+                    vs <span className="font-medium">{opponent.name}</span>
+                  </span>
+                  <span
+                    className={
+                      won
+                        ? "text-emerald-700 dark:text-emerald-400"
+                        : "text-black/50 dark:text-white/50"
+                    }
+                  >
+                    {won ? `+${b.sparkCoinsAwarded} ✨` : "Lost"}
+                  </span>
+                  <Link
+                    href={`/arena/battle/${b.id}`}
+                    className="text-xs underline-offset-4 hover:underline"
+                  >
+                    see
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section>

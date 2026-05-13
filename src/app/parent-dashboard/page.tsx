@@ -42,9 +42,17 @@ export default async function ParentDashboard() {
         </SignOutButton>
       </header>
 
-      <section className="mb-8 space-y-2 rounded-lg border border-black/10 p-6 dark:border-white/20">
-        <p className="text-sm text-black/60 dark:text-white/60">Signed in as</p>
-        <p className="font-mono text-lg">{email}</p>
+      <section className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-black/10 p-6 dark:border-white/20">
+        <div>
+          <p className="text-sm text-black/60 dark:text-white/60">Signed in as</p>
+          <p className="font-mono text-lg">{email}</p>
+        </div>
+        <Link
+          href="/arena"
+          className="rounded-full border border-black/15 px-4 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+        >
+          Visit the arena →
+        </Link>
       </section>
 
       <section>
@@ -82,6 +90,10 @@ export default async function ParentDashboard() {
                   <p className="mt-1 text-xs text-black/60 dark:text-white/60">
                     {AGE_RANGE_LABELS[kid.ageRange]} · {kid._count.characters}{" "}
                     character{kid._count.characters === 1 ? "" : "s"}
+                  </p>
+                  <p className="mt-2 text-sm">
+                    <span className="font-medium">{kid.sparkBalance}</span>{" "}
+                    <span className="text-black/50 dark:text-white/50">✨ Spark</span>
                   </p>
                 </Link>
               </li>

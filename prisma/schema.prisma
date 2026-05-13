@@ -19,12 +19,13 @@ model Parent {
 }
 
 model Kid {
-  id          String   @id @default(cuid())
-  parentId    String   @map("parent_id")
-  displayName String   @map("display_name")
-  ageRange    AgeRange @map("age_range")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(cuid())
+  parentId     String   @map("parent_id")
+  displayName  String   @map("display_name")
+  ageRange     AgeRange @map("age_range")
+  sparkBalance Int      @default(0) @map("spark_balance")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   parent     Parent      @relation(fields: [parentId], references: [id], onDelete: Cascade)
   characters Character[]
@@ -55,8 +56,11 @@ model Character {
   createdAt              DateTime                @default(now()) @map("created_at")
   updatedAt              DateTime                @updatedAt @map("updated_at")
 
-  kid          Kid           @relation(fields: [kidId], references: [id], onDelete: Cascade)
-  chatMessages ChatMessage[]
+  kid             Kid           @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  chatMessages    ChatMessage[]
+  battlesAsA      Battle[]      @relation("BattleCharacterA")
+  battlesAsB      Battle[]      @relation("BattleCharacterB")
+  battlesWon      Battle[]      @relation("BattleWinner")
 
   @@index([kidId])
   @@index([kidId, createdAt])
@@ -98,4 +102,26 @@ enum ChatMessageRole {
   CHARACTER
 
   @@map("chat_message_role")
+}
+
+model Battle {
+  id                 String   @id @default(cuid())
+  characterAId       String   @map("character_a_id")
+  characterBId       String   @map("character_b_id")
+  scenarioId         String   @map("scenario_id")
+  winnerId           String   @map("winner_id")
+  outcomeNarrative   String   @map("outcome_narrative")
+  sparkCoinsAwarded  Int      @map("spark_coins_awarded")
+  promptVersion      String   @map("prompt_version")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  characterA Character @relation("BattleCharacterA", fields: [characterAId], references: [id], onDelete: Cascade)
+  characterB Character @relation("BattleCharacterB", fields: [characterBId], references: [id], onDelete: Cascade)
+  winner     Character @relation("BattleWinner",     fields: [winnerId],     references: [id], onDelete: Cascade)
+
+  @@index([characterAId])
+  @@index([characterBId])
+  @@index([winnerId])
+  @@index([createdAt])
+  @@map("battles")
 }

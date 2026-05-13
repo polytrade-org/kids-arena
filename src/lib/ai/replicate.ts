@@ -44,7 +44,10 @@ export async function generateCharacterVisual(
 
   const prompt = `${styleModifier} portrait of ${input.name}, ${vibeExcerpt}, kid-friendly, vibrant colors, character design, centered composition, no text, no watermark`;
 
-  const output = (await client().run(FLUX_SCHNELL, {
+  // Hard 30s ceiling on visual gen (per build plan). If Replicate doesn't
+  // return in time we fail fast and the caller saves the character with
+  // status=FAILED so the kid can retry later instead of waiting.
+  const runPromise = client().run(FLUX_SCHNELL, {
     input: {
       prompt,
       num_outputs: 1,
@@ -52,7 +55,11 @@ export async function generateCharacterVisual(
       output_format: "webp",
       output_quality: 90,
     },
-  })) as unknown;
+  });
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Visual generation timed out after 30s")), 30_000)
+  );
+  const output = (await Promise.race([runPromise, timeoutPromise])) as unknown;
 
   const url = await extractFirstImageUrl(output);
   if (!url) throw new Error("Replicate returned no image URL.");
