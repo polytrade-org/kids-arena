@@ -1,4 +1,5 @@
 import Replicate from "replicate";
+import { uploadFromUrl } from "@/lib/storage/r2";
 
 const FLUX_SCHNELL = "black-forest-labs/flux-schnell" as const;
 
@@ -61,9 +62,17 @@ export async function generateCharacterVisual(
   );
   const output = (await Promise.race([runPromise, timeoutPromise])) as unknown;
 
-  const url = await extractFirstImageUrl(output);
-  if (!url) throw new Error("Replicate returned no image URL.");
-  return { visualUrl: url, promptUsed: prompt };
+  const replicateUrl = await extractFirstImageUrl(output);
+  if (!replicateUrl) throw new Error("Replicate returned no image URL.");
+
+  // Persist to R2 immediately — Replicate's replicate.delivery URLs expire
+  // after ~1–2 hours, which would silently rot character portraits.
+  const upload = await uploadFromUrl(replicateUrl, "characters/portraits", {
+    contentType: "image/webp",
+    ext: "webp",
+  });
+
+  return { visualUrl: upload.publicUrl, promptUsed: prompt };
 }
 
 /**
