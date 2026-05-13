@@ -19,6 +19,8 @@ export default async function ParentDashboard() {
 
   // Idempotent: creates Parent row on first dashboard load, no-op on subsequent loads.
   // Upsert by email is safe because email is unique and Clerk-verified.
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
   const parent = await prisma.parent.upsert({
     where: { email },
     update: {},
@@ -26,7 +28,14 @@ export default async function ParentDashboard() {
     include: {
       kids: {
         orderBy: { createdAt: "asc" },
-        include: { _count: { select: { characters: true } } },
+        include: {
+          _count: {
+            select: {
+              characters: true,
+              thumbnailSets: { where: { createdAt: { gt: weekAgo } } },
+            },
+          },
+        },
       },
     },
   });
@@ -89,7 +98,9 @@ export default async function ParentDashboard() {
                   <p className="text-lg font-medium">{kid.displayName}</p>
                   <p className="mt-1 text-xs text-black/60 dark:text-white/60">
                     {AGE_RANGE_LABELS[kid.ageRange]} · {kid._count.characters}{" "}
-                    character{kid._count.characters === 1 ? "" : "s"}
+                    character{kid._count.characters === 1 ? "" : "s"} ·{" "}
+                    {kid._count.thumbnailSets} thumbnail set
+                    {kid._count.thumbnailSets === 1 ? "" : "s"} this week
                   </p>
                   <p className="mt-2 text-sm">
                     <span className="font-medium">{kid.sparkBalance}</span>{" "}

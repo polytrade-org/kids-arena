@@ -54,7 +54,28 @@ export default async function KidDetailPage({
         </p>
       </header>
 
-      <section>
+      <nav className="mb-8 grid grid-cols-2 gap-3">
+        <Link
+          href={`/parent-dashboard/kids/${kid.id}#characters`}
+          className="rounded-lg border border-black/10 px-4 py-3 text-sm font-medium hover:border-black/30 dark:border-white/20 dark:hover:border-white/40"
+        >
+          <span className="block">Arena</span>
+          <span className="mt-1 block text-xs font-normal text-black/50 dark:text-white/50">
+            Characters · battles · spark
+          </span>
+        </Link>
+        <Link
+          href={`/parent-dashboard/kids/${kid.id}/studio`}
+          className="rounded-lg border border-black/10 px-4 py-3 text-sm font-medium hover:border-black/30 dark:border-white/20 dark:hover:border-white/40"
+        >
+          <span className="block">Studio</span>
+          <span className="mt-1 block text-xs font-normal text-black/50 dark:text-white/50">
+            Thumbnails · scripts · shorts
+          </span>
+        </Link>
+      </nav>
+
+      <section id="characters">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-medium text-black/60 dark:text-white/60">
             Characters

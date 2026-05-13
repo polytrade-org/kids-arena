@@ -27,8 +27,9 @@ model Kid {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  parent     Parent      @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  characters Character[]
+  parent        Parent         @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  characters    Character[]
+  thumbnailSets ThumbnailSet[]
 
   @@index([parentId])
   @@map("kids")
@@ -124,4 +125,61 @@ model Battle {
   @@index([winnerId])
   @@index([createdAt])
   @@map("battles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Studio module (V1.5) — creator tools for kids making real-world content.
+// Same Kid record, same parent dashboard, same Spark economy. See brief §6a.
+
+model ThumbnailSet {
+  id               String         @id @default(cuid())
+  kidId            String         @map("kid_id")
+  videoDescription String         @map("video_description")
+  titleText        String         @map("title_text")
+  niche            Niche
+  stylePreset      ThumbnailStyle @map("style_preset")
+  promptVersion    String         @map("prompt_version")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  kid        Kid         @relation(fields: [kidId], references: [id], onDelete: Cascade)
+  thumbnails Thumbnail[]
+
+  @@index([kidId, createdAt])
+  @@map("thumbnail_sets")
+}
+
+model Thumbnail {
+  id        String                 @id @default(cuid())
+  setId     String                 @map("set_id")
+  position  Int
+  imageUrl  String?                @map("image_url")
+  status    VisualGenerationStatus @default(PENDING)
+  selected  Boolean                @default(false)
+  createdAt DateTime               @default(now()) @map("created_at")
+
+  set ThumbnailSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([setId])
+  @@index([setId, selected])
+  @@map("thumbnails")
+}
+
+enum Niche {
+  CARS
+  GAMING
+  ANIME
+  SPORTS
+  GENERAL
+
+  @@map("niche")
+}
+
+enum ThumbnailStyle {
+  BRIGHT_ENERGETIC
+  MYSTERIOUS
+  COMEDIC
+  PROFESSIONAL
+
+  @@map("thumbnail_style")
 }

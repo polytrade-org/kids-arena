@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   MODERATION_PROMPT_VERSION,
   MODERATION_SYSTEM_PROMPT_V1,
+  STUDIO_MODERATION_SYSTEM_PROMPT_V1,
 } from "@/lib/ai/prompts";
 
 const MODEL_MODERATION = "anthropic/claude-haiku-4.5";
@@ -18,6 +19,11 @@ export type ModerationVerdict =
 
 export type ModerationContext = "user_input" | "ai_output";
 
+// "arena" enforces the strict no-brand-names rule for character creation,
+// chat, and battles. "studio" allows brand mentions since legitimate creator
+// content references real cars / games / sports.
+export type ModerationSurface = "arena" | "studio";
+
 /**
  * Pre/post-display content moderation. Every AI generation MUST pass this
  * before storage or display (see CLAUDE.md). Returns a verdict; caller
@@ -25,7 +31,8 @@ export type ModerationContext = "user_input" | "ai_output";
  */
 export async function moderateText(
   text: string,
-  context: ModerationContext
+  context: ModerationContext,
+  surface: ModerationSurface = "arena"
 ): Promise<ModerationVerdict & { promptVersion: string }> {
   const trimmed = text.trim();
   if (!trimmed) return { safe: true, promptVersion: MODERATION_PROMPT_VERSION };
@@ -41,10 +48,15 @@ Text:
 ${trimmed}
 """`;
 
+  const systemPrompt =
+    surface === "studio"
+      ? STUDIO_MODERATION_SYSTEM_PROMPT_V1
+      : MODERATION_SYSTEM_PROMPT_V1;
+
   const { object } = await generateObject({
     model: MODEL_MODERATION,
     schema: verdictSchema,
-    system: MODERATION_SYSTEM_PROMPT_V1,
+    system: systemPrompt,
     prompt: userPrompt,
   });
 
