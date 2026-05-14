@@ -6,6 +6,62 @@ export const CHAT_PROMPT_VERSION = "chat_v1";
 export const MODERATION_PROMPT_VERSION = "moderation_v1";
 export const BATTLE_PROMPT_VERSION = "battle_v1";
 export const THUMBNAIL_PROMPT_VERSION = "thumbnail_v1";
+export const SCRIPT_PROMPT_VERSION = "script_v1";
+
+export const SCRIPT_SYSTEM_PROMPT_V1 = `You are a video script writer for kid creators (ages 8–14) publishing to YouTube / TikTok / Instagram. Your job is to produce a short, performable script in the kid's chosen niche, tone, and target length.
+
+Hard rules:
+- Strictly PG content. No profanity, no violence, no romance, no scary themes, no drugs/alcohol, no gambling.
+- Brand mentions are FINE for legitimate content (Lamborghini, Roblox, NBA, etc.) — kids legitimately make videos about real-world topics. Do NOT mention any individual real living person by name (celebrities, athletes, streamers).
+- Reading level appropriate for the kid's age band. Short sentences, vivid words, no jargon the kid wouldn't say themselves.
+- Don't write meta directions like "(camera zooms in)". Write what the kid SAYS. The hook is what comes out of their mouth in the first 3 seconds.
+- Don't include section labels in the spoken text itself. The structure is in the JSON, not in what the kid reads aloud.
+- Never ask the viewer for personal info, never push them to DMs, never reference unsafe platforms.
+
+Output MUST match the JSON schema described in the user message. No prose, no markdown, no code fences.`;
+
+export const SCRIPT_USER_PROMPT_TEMPLATE_V1 = (params: {
+  niche: string;
+  topic: string;
+  toneLabel: string;
+  toneHint: string;
+  ageBandLabel: string;
+  targetLengthLabel: string;
+  targetSeconds: number;
+  sectionCount: number;
+}) => `Write a video script.
+
+Niche: ${params.niche}
+Topic: ${params.topic}
+Tone: ${params.toneLabel} — ${params.toneHint}
+Audience reading level: ${params.ageBandLabel}
+Target length: ${params.targetLengthLabel} (~${params.targetSeconds} seconds total when read at a natural pace)
+Structure: 1 hook + ${params.sectionCount} body sections + 1 outro / CTA.
+
+JSON shape (no extra keys):
+{
+  "hook": "<1–2 sentences that land in the first ~3 seconds. Must make a kid stop scrolling. Spoken first-person, in the kid's voice.>",
+  "sections": [<${params.sectionCount} strings, each 1–3 short sentences, spoken first-person, advancing the topic>],
+  "outro": "<1 sentence wrap + a soft call-to-action that does NOT push to external platforms. Things like 'see you in the next one' or 'let me know what to spot next' are fine.>",
+  "estimatedDurationSec": <integer estimate of how long this runs when read at the kid's natural pace>
+}`;
+
+export const SCRIPT_TONE_HINTS: Record<string, string> = {
+  EXCITED:
+    "high-energy, exclamatory, lots of momentum, fast pacing, exclamation marks ok",
+  EDUCATIONAL:
+    "clear, curious, leading with facts and a 'did you know?' framing, explanatory but punchy",
+  FUNNY:
+    "playful, silly, willing to be self-deprecating, light wordplay, no mean humor",
+  CALM_EXPLAINER:
+    "calm, thoughtful, paced like a slower YouTube essay — soft confidence, no shouting",
+};
+
+export const SCRIPT_AGE_BAND_LABELS: Record<string, string> = {
+  AGES_8_10: "ages 8–10 (~3rd–5th grade reading level, short clear sentences)",
+  AGES_11_12: "ages 11–12 (~6th–7th grade reading level)",
+  AGES_13_14: "ages 13–14 (~8th–9th grade reading level)",
+};
 
 // Used as the base of every Flux thumbnail prompt. The per-variant prompt
 // fills in {niche}, {style}, {titleText}, {videoDescription}, {variant}

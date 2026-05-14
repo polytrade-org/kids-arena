@@ -30,6 +30,7 @@ model Kid {
   parent        Parent         @relation(fields: [parentId], references: [id], onDelete: Cascade)
   characters    Character[]
   thumbnailSets ThumbnailSet[]
+  scripts       Script[]
 
   @@index([parentId])
   @@map("kids")
@@ -182,4 +183,39 @@ enum ThumbnailStyle {
   PROFESSIONAL
 
   @@map("thumbnail_style")
+}
+
+model Script {
+  id            String       @id @default(cuid())
+  kidId         String       @map("kid_id")
+  niche         Niche
+  topic         String
+  targetLength  ScriptLength @map("target_length")
+  tone          ScriptTone
+  contentJson   Json         @map("content_json")
+  promptVersion String       @map("prompt_version")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  kid Kid @relation(fields: [kidId], references: [id], onDelete: Cascade)
+
+  @@index([kidId, createdAt])
+  @@map("scripts")
+}
+
+enum ScriptLength {
+  SECS_30
+  SECS_60
+  MINS_2
+
+  @@map("script_length")
+}
+
+enum ScriptTone {
+  EXCITED
+  EDUCATIONAL
+  FUNNY
+  CALM_EXPLAINER
+
+  @@map("script_tone")
 }

@@ -28,7 +28,7 @@ const TOOLS: Tool[] = [
     id: "scripts",
     label: "Script writer",
     description: "Generate a video script in your niche and tone.",
-    status: "soon",
+    status: "available",
   },
   {
     id: "broll",
@@ -75,6 +75,10 @@ export default async function StudioPage({
             where: { OR: [{ selected: true }, { status: "READY" }] },
           },
         },
+      },
+      scripts: {
+        orderBy: { createdAt: "desc" },
+        take: 5,
       },
     },
   });
@@ -200,6 +204,62 @@ export default async function StudioPage({
                 </li>
               );
             })}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-black/60 dark:text-white/60">
+            Recent scripts
+          </h2>
+          <div className="flex gap-2">
+            {kid.scripts.length > 0 && (
+              <Link
+                href={`/parent-dashboard/kids/${kid.id}/studio/scripts`}
+                className="text-sm underline-offset-4 hover:underline"
+              >
+                View all
+              </Link>
+            )}
+            <Link
+              href={`/parent-dashboard/kids/${kid.id}/studio/scripts/new`}
+              className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition hover:opacity-90"
+            >
+              + New script
+            </Link>
+          </div>
+        </div>
+
+        {kid.scripts.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-black/20 p-8 text-center text-sm text-black/60 dark:border-white/30 dark:text-white/60">
+            <p className="mb-3">No scripts yet.</p>
+            <Link
+              href={`/parent-dashboard/kids/${kid.id}/studio/scripts/new`}
+              className="font-medium underline-offset-4 hover:underline"
+            >
+              Write your first script →
+            </Link>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {kid.scripts.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/parent-dashboard/kids/${kid.id}/studio/scripts/${s.id}`}
+                  className="block rounded-lg border border-black/10 p-3 transition hover:border-black/30 dark:border-white/20 dark:hover:border-white/40"
+                >
+                  <p className="line-clamp-1 text-sm font-medium">{s.topic}</p>
+                  <p className="mt-0.5 text-xs text-black/50 dark:text-white/50">
+                    {NICHE_LABELS[s.niche]} ·{" "}
+                    {s.createdAt.toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
+                </Link>
+              </li>
+            ))}
           </ul>
         )}
       </section>
